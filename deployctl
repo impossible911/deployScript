@@ -1,0 +1,389 @@
+#!/bin/bash
+#properties_dir=${properties_dir}
+properties_dir="/mnt/build/deployctl.properties"
+ttySize=`stty size | awk '{print $2}'`
+function makeProperties() {
+  local fileDir=$1
+  local build_dir=$2
+  local fileDirPre=${fileDir%/*}
+  if [ ! -d $fileDirPre ]; then
+      mkdir -p $fileDirPre
+  fi
+   logOut "makeProperties " "deployctl.properties 开始创建模板文件" "warning"
+cat <<EOF | tee -a $fileDir
+project_dir=$build_dir
+project_jar_dir=jar
+project_history_name=update-history
+project_jar_custom_name=
+mainVersion=1
+isShellBuild=0
+harbor_address=
+harbor_project=
+harbor_base_image=
+kubernetes_pod_name_pre=
+kubernetes_namespace=
+dockerfile_copy_file_name=dockerfile-file
+dockerfile_jar_name=dockerfile-jar
+skywalking_agent_name=project_name
+EOF
+echo ""
+logOut "makeProperties " "$properties_dir 模板文件填充完成，请设置您的部署信息 " "error"
+echo ""
+logOut "makeProperties " "$properties_dir 设置完成后请再次deployctl start 初始化工作空间 " "error"
+}
+function properties() {
+properties_dir=$1
+project_jar_dir=`cat $properties_dir | grep "project_jar_dir" | sed 's/=/\n/g' | sed  '1d'`
+project_history_name=`cat $properties_dir | grep "project_history_name" | sed 's/=/\n/g' | sed  '1d'`
+project_dir=`cat $properties_dir | grep "project_dir" | sed 's/=/\n/g' | sed  '1d'`
+mainVersion=`cat $properties_dir | grep "mainVersion" | sed 's/=/\n/g' | sed  '1d'`
+dateVersion=`date +%y%m`
+isShellBuild=`cat $properties_dir | grep "isShellBuild" | sed 's/=/\n/g' | sed  '1d'`
+harbor_address=`cat $properties_dir | grep "harbor_address" | sed 's/=/\n/g' | sed  '1d'`
+harbor_project=`cat $properties_dir | grep "harbor_project" | sed 's/=/\n/g' | sed  '1d'`
+harbor_base_image=`cat $properties_dir | grep "harbor_base_image" | sed 's/=/\n/g' | sed  '1d'`
+kubernetes_pod_name_pre=`cat $properties_dir | grep "kubernetes_pod_name_pre" | sed 's/=/\n/g' | sed  '1d'`
+kubernetes_namespace=`cat $properties_dir | grep "kubernetes_namespace" | sed 's/=/\n/g' | sed  '1d'`
+skywalking_agent_name=`cat $properties_dir | grep "skywalking_agent_name" | sed 's/=/\n/g' | sed  '1d'`
+dockerfile_jar_name=`cat $properties_dir | grep "dockerfile_jar_name" | sed 's/=/\n/g' | sed  '1d'`
+project_jar_custom_name=`cat $properties_dir | grep "project_jar_custom_name" | sed 's/=/\n/g' | sed  '1d'`
+dockerfile_copy_file_name=`cat $properties_dir | grep "dockerfile_copy_file_name" | sed 's/=/\n/g' | sed  '1d'`
+if [[ -z $project_jar_dir ]] || [[ -z $project_history_name ]] || [[ -z $project_dir ]] || [[ -z $harbor_address ]] \
+|| [[ -z $harbor_project ]] || [[ -z $harbor_base_image ]] || [[ -z $kubernetes_pod_name_pre ]] || [[ -z $kubernetes_namespace ]] || [[ -z $dockerfile_jar_name ]]; then
+    return 1
+fi
+}
+function logOut() {
+    local stage=$1
+    local logContent=$2
+    local logEvel=$3
+#    local ttySize=`stty size | awk '{print $2}'`
+    local contentSize=`echo "[$stage] [$logContent] " | wc -L`
+    local outPutSize=`expr $ttySize - $contentSize`
+    if [ $logEvel == "error" ]; then
+    echo -e "\033[31m[$stage] [$logContent] `yes "*" | sed $outPutSize'q'| tr -d '\n'`\033[0m"
+    elif [ $logEvel == "success" ]; then
+    echo -e "\033[36m[$stage] [$logContent] `yes "*" | sed $outPutSize'q'| tr -d '\n'`\033[0m"
+    elif [ $logEvel == "warning" ]; then
+    echo -e "\033[33m[$stage] [$logContent] `yes "*" | sed $outPutSize'q'| tr -d '\n'`\033[0m"
+    fi
+    echo ""
+}
+function stringIsEquals() {
+  var=$1
+  IFS=$','
+  for jar_custom_name in ${project_jar_custom_name} ; do
+    if [ $var == $jar_custom_name ]; then
+        return 2
+    fi
+  done
+}
+function buildPre() {
+  local project_jar=$1
+  local project_jar_name_pre=$2
+  local project_name=$3
+  local project_tag=$4
+    if [ -z $project_jar ]; then
+        logOut "buildPre" "更新的jar包名称不能为空 " "error"
+        return 1
+    fi
+    if [ -z $project_name ]; then
+        logOut "buildPre" "更新的服务名不能为空 " "error"
+        return 1
+    fi
+
+    if [ -z $project_tag ]; then
+        logOut "buildPre" "更新的服务版本号不能为空 " "error"
+        return 1
+    fi
+
+    if [ ! -d $project_dir/$project_name/ ]; then
+        logOut "buildPre" "$project_name 服务构建目录为空，开始创建目录 " "warning"
+        mkdir -p "$project_dir/$project_name/"
+    fi
+
+  logOut "buildPre" "$project_name 正在移动部署包 " "warning"
+  /usr/bin/mv -f $project_dir/$project_jar_dir/$project_jar $project_dir/$project_name/
+  stringIsEquals $project_name
+  if [ $? != 2 ]; then
+  /usr/bin/cp -f $project_dir/Dockerfile $project_dir/$project_name/Dockerfile
+  sed -i "s/${dockerfile_jar_name}/${project_jar_name_pre}-*.jar/g" $project_dir/$project_name/Dockerfile
+  sed -i "s/${dockerfile_copy_file_name}/${project_jar}/g" $project_dir/$project_name/Dockerfile
+  else
+    logOut "buildPre" "$project_name 使用自定义Dockerfile模板 " "success"
+  fi
+
+  sed -i "s/$skywalking_agent_name/${harbor_project}-${project_name}/g" $project_dir/$project_name/Dockerfile
+  if [ $? -eq 0 ]; then
+      logOut "buildPre" "$project_name 设置skywalking_agent_name" "success"
+    else
+      logOut "buildPre" "$project_name skywalking.agent.name修改失败,将以默认名称启动" "warning"
+  fi
+
+  buildIn $project_name $project_tag $project_jar
+  if [ $? == 1 ]; then
+     /usr/bin/mv -f $project_dir/$project_name/$project_jar $project_dir/$project_jar_dir/
+     return 1
+  fi
+
+}
+
+function buildIn() {
+
+   local project_name=$1
+   local jarTag=$2
+   local project_jar_name=$3
+   if [ -z $project_name ]; then
+       logOut "buildIn " "$project_name 服务构建目录名不能为空" "error"
+       return 1
+   fi
+   if [ -z $jarTag ]; then
+       logOut "buildIn " "$project_name 服务构建版本不能为空" "error"
+       return 1
+   fi
+   local project_tag=$mainVersion.$dateVersion.$isShellBuild.$jarTag
+
+   local imageName=$harbor_address/$harbor_project/${harbor_project}-${project_name}:$project_tag
+
+   local deploy_name=${kubernetes_pod_name_pre}-${project_name}
+
+   cd $project_dir/$project_name && docker build . -t $imageName
+
+  if [ $? -eq 0 ]; then
+    docker push $imageName
+      if [ $? -eq 0 ]; then
+        kubectl set image deployment $deploy_name $deploy_name=$imageName -n $kubernetes_namespace
+        if [ $? -eq 0 ]; then
+            logOut "buildIn " "$deploy_name update completed " "success"
+            else
+            logOut "buildIn " "$deploy_name update failed " "error"
+              return 1
+        fi
+        else
+            logOut "buildIn " "$deploy_name docker push failed " "error"
+          return 1
+      fi
+    else
+      logOut "buildIn " "$deploy_name docker build failed " "error"
+      return 1
+  fi
+
+  buildPro $project_name $project_jar_name
+}
+function buildPro() {
+  local project_name=$1
+  local project_jar_name=$2
+  if [ -z $project_name ]; then
+      logOut "buildPro " "服务构建目录名不能为空 " "error"
+      return 1
+  fi
+  if [ -z $project_jar_name ]; then
+      logOut "buildPro " "服务包名不能为空 " "error"
+      return 1
+  fi
+  /usr/bin/mv -f $project_dir/$project_name/$project_jar_name $project_dir/$project_history_name/$project_jar_name`date +%Y%m%d%T`
+  stringIsEquals $project_name
+  if [ $? != 2 ]; then
+  /usr/bin/rm -f $project_dir/$project_name/Dockerfile
+  fi
+  logOut "buildPro " "$project_name 更新完成 " "success"
+}
+
+function banner() {
+echo "
+DDDDDDDDDDDDD                                             lllllll                                                               tttt         lllllll
+D::::::::::::DDD                                          l:::::l                                                            ttt:::t         l:::::l
+D:::::::::::::::DD                                        l:::::l                                                            t:::::t         l:::::l
+DDD:::::DDDDD:::::D                                       l:::::l                                                            t:::::t         l:::::l
+  D:::::D    D:::::D    eeeeeeeeeeee   ppppp   ppppppppp   l::::l   oooooooooooyyyyyyy           yyyyyyycccccccccccccccttttttt:::::ttttttt    l::::l
+  D:::::D     D:::::D ee::::::::::::ee p::::ppp:::::::::p  l::::l oo:::::::::::oy:::::y         y:::::cc:::::::::::::::t:::::::::::::::::t    l::::l
+  D:::::D     D:::::De::::::eeeee:::::ep:::::::::::::::::p l::::lo:::::::::::::::y:::::y       y:::::c:::::::::::::::::t:::::::::::::::::t    l::::l
+  D:::::D     D:::::e::::::e     e:::::pp::::::ppppp::::::pl::::lo:::::ooooo:::::oy:::::y     y:::::c:::::::cccccc:::::tttttt:::::::tttttt    l::::l
+  D:::::D     D:::::e:::::::eeeee::::::ep:::::p     p:::::pl::::lo::::o     o::::o y:::::y   y:::::yc::::::c     ccccccc     t:::::t          l::::l
+  D:::::D     D:::::e:::::::::::::::::e p:::::p     p:::::pl::::lo::::o     o::::o  y:::::y y:::::y c:::::c                  t:::::t          l::::l
+  D:::::D     D:::::e::::::eeeeeeeeeee  p:::::p     p:::::pl::::lo::::o     o::::o   y:::::y:::::y  c:::::c                  t:::::t          l::::l
+  D:::::D    D:::::De:::::::e           p:::::p    p::::::pl::::lo::::o     o::::o    y:::::::::y   c::::::c     ccccccc     t:::::t    ttttttl::::l
+DDD:::::DDDDD:::::D e::::::::e          p:::::ppppp:::::::l::::::o:::::ooooo:::::o     y:::::::y    c:::::::cccccc:::::c     t::::::tttt:::::l::::::l
+D:::::::::::::::DD   e::::::::eeeeeeee  p::::::::::::::::pl::::::o:::::::::::::::o      y:::::y      c:::::::::::::::::c     tt::::::::::::::l::::::l
+D::::::::::::DDD      ee:::::::::::::e  p::::::::::::::pp l::::::loo:::::::::::oo      y:::::y        cc:::::::::::::::c       tt:::::::::::tl::::::l
+DDDDDDDDDDDDD           eeeeeeeeeeeeee  p::::::pppppppp   llllllll  ooooooooooo       y:::::y           cccccccccccccccc         ttttttttttt llllllll
+                                        p:::::p                                      y:::::y
+                                        p:::::p                                     y:::::y
+                                       p:::::::p                                   y:::::y
+                                       p:::::::p                                  y:::::y
+                                       p:::::::p                                 yyyyyyy
+                                       ppppppppp                                                                                                                                                   "
+}
+
+function makeDockerfile() {
+    local fileDir=$1
+    logOut "makeDockerfile " "开始创建Dockerfile模板 " "success"
+cat <<EOF | tee -a $fileDir
+FROM $harbor_address/$harbor_base_image
+WORKDIR /root/
+COPY ./$dockerfile_copy_file_name /tmp/
+RUN ln -snf /usr/share/zoneinfo/\$TZ /etc/localtime && echo \$TZ > /etc/timezone
+ENTRYPOINT ["sh", "-ec", "tar -zxvf /root/nacos-download/jhop5-framework-nacos-download-5.0.1088.RELEASE.tar.gz -C /root/nacos-download;tar -zxvf /root/skywalking.tar.gz -C /root;tar -zxvf /tmp/*.tar.gz -C /root;sh /root/nacos-download/start.sh; exec java \${JAVA_OPTS} -Dspring.cloud.nacos.config.enabled=false -Dspring.cloud.nacos.config.refresh.enabled=false  -javaagent:/root/skywalking/agent/skywalking-agent.jar -Dspring.config.location=/root/config/ -Dskywalking.collector.backend_service=\${SKYWALKING_ENDPOINT} -Dskywalking.agent.service_name=$skywalking_agent_name -jar $dockerfile_jar_name"]
+EOF
+}
+
+function building() {
+  jars=`ls $project_dir/$project_jar_dir`
+  if [[ -z $jars ]]; then
+      logOut "building " "当前没有需要部署的服务 " "success"
+      exit 0
+  fi
+  # shellcheck disable=SC2045
+  for jarName in `ls $project_dir/$project_jar_dir`; do
+    if [[  $jarName == *.tar.gz ]]; then
+     noJarName=${jarName%.tar*}
+     elif [[ $jarName == *.jar ]]; then
+     noJarName=${jarName%.*}
+    fi
+     jar_name_pre=${jarName%-*}
+     jar_name=${jar_name_pre#*-}
+     tag=${noJarName##*-}
+     if [ -z $noJarName ]; then
+         logOut "building " "部署包名称获取失败，请使用 deployctl help " "error"
+         return 1
+     fi
+     if [ -z $jar_name_pre ]; then
+         logOut "building " "部署包版本前缀字符获取失败，请使用deployctl help " "error"
+         return 1
+     fi
+     if [ -z $jar_name ]; then
+         logOut "building " "部署包截取服务名称失败，请使用deployctl help " "error"
+         return 1
+     fi
+     if [ -z $tag ]; then
+         logOut "building " "部署包版本获取失败，请使用deployctl help " "error"
+         return 1
+     fi
+     buildPre $jarName $jar_name_pre $jar_name $tag &
+  done
+  wait
+}
+function dirIsExit() {
+    if [ -d "$project_dir" ]; then
+          logOut "dirIsExit " "工作目录：$project_dir " "success"
+          if [ -e $project_dir/Dockerfile ]; then
+              logOut "dirIsExit " "检测到Dockerfile模板 " "success"
+              else
+                makeDockerfile $project_dir/Dockerfile
+          fi
+          if [ -d $project_dir/$project_jar_dir ]; then
+               logOut "dirIsExit " "$project_jar_dir 仓库已存在 " "success"
+               else
+                 logOut "dirIsExit " "$project_jar_dir 创建仓库 " "warning"
+                 mkdir -p "$project_dir/$project_jar_dir"
+          fi
+          if [ -d $project_dir/$project_history_name ]; then
+               logOut "dirIsExit " "$project_history_name 已存在 " "success"
+               else
+                mkdir -p "$project_dir/$project_history_name"
+          fi
+    else
+           mkdir -p "$project_dir"
+           mkdir -p "$project_dir/$project_jar_dir"
+           makeDockerfile $project_dir/Dockerfile
+    fi
+}
+
+function help() {
+    banner
+    echo "用法：deployctl start"
+    echo ""
+    echo "deployctl.properties配置说明"
+    echo ""
+    echo "注意事项：该脚本并非通用，它只适用于指定名称格式的服务jar包,示例： xxx-服务名称-版本号.jar"
+    echo "          脚本配置项内容都为必填项，且需要符合所在环境的实际情况。"
+    echo "          配置项的错误填写，可能会在某个环节造成致命错误，导致服务构建失败，配置项中不允许出现中文字符"
+    echo ""
+    echo "配置项的解释说明如下："
+    echo ""
+    echo "Harbor仓库配置信息："
+    echo ""
+    echo "       harbor_address：           Harbor仓库地址，格式为：IP:PORT "
+    echo "                                  示例：  171.16.20.22:88"
+    echo ""
+    echo "       harbor_project：           由微服务构建的可运行镜像存放在Harbor中的目录名称"
+    echo ""
+    echo "       harbor_base_image：        Dockerfile构建的基础镜像名称，以目录名开始至镜像名称结尾"
+    echo "                                  示例：library/centos7-java-build-bases-images:1.0.1.RELEASE"
+    echo ""
+    echo "kubernetes配置信息：              当前构建的服务在Kubernetes集群中必须为deployment类型"
+    echo ""
+    echo "       kubernetes_namespace：     微服务部署在Kubernetes集群中的命名空间"
+    echo ""
+    echo "       kubernetes_pod_name_pre：  微服务部署在Kubernetes集群中POD名称的前缀"
+    echo "                                  运管服务的POD名称前缀相同"
+    echo ""
+    echo "服务配置信息："
+    echo ""
+    echo "    镜像版本号信息："
+    echo ""
+    echo "       isShellBuild：              当前服务的构建是由脚本自动进行还是人为干预进行，脚本自动部署为0(默认)，人为干预为1"
+    echo ""
+    echo "       mainVersion：               当前服务的主版本信息，当前默认为1，时间：2020-10-15 15:40"
+    echo ""
+    echo "    服务构建目录信息："
+    echo ""
+    echo "       project_dir：               您希望构建发布操作在哪个目录下进行，该目录会存放使用服务的部署jar包，Dockerfile等内容"
+    echo ""
+    echo "       project_history_name：      在构建完成后，您希望jar包保存在构建目录下的哪个目录中"
+    echo ""
+    echo "       project_jar_dir：           在构建之前，请将所有需要构建的服务保存在该目录下"
+    echo ""
+    echo "       project_jar_custom_name：   将允许指定的服务使用特定的Dockerfile进行构建"
+    echo ""
+    echo "       skywalking_agent_name：     该配置项请保持默认值project_name"
+
+}
+
+function start() {
+  banner
+
+  if [ ! -e $properties_dir ]; then
+      logOut "start " "deployctl.properties 文件不存在" "warning"
+      read -p "请输入工作目录: " build_dir
+      makeProperties $properties_dir $build_dir
+      exit 1
+  fi
+  properties $properties_dir
+  if [ $? == 1 ]; then
+      echo "$properties_dir 配置信息不能有空项"
+      exit 1
+  fi
+  dirIsExit
+  building
+  if [ $? == 1 ]; then
+      exit 1
+  fi
+}
+
+while [[ $# -gt 0 ]]; do
+   key=$1
+  case $key in
+       start )
+       start="true"
+       shift
+       shift
+       ;;
+       help)
+       help="true"
+       shift
+       shift
+       ;;
+       *)
+  esac
+done
+
+if [[ $start ]]; then
+  start
+  exit 0
+fi
+
+if [[ $help ]]; then
+  help
+  exit 0
+fi
