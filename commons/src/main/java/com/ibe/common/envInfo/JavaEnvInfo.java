@@ -22,55 +22,54 @@ public class JavaEnvInfo implements Serializable {
     /**
      * Java 供应商
      */
-    public static final String JAVA_VENDOR = JavaSystemCommons.get(SystemEnvInfoKey.Vendor.JAVA_VENDOR);
-    public static final String JAVA_VENDOR_URL = JavaSystemCommons.get(SystemEnvInfoKey.Vendor.JAVA_VENDOR_URL);
-    public static final String JAVA_VENDOR_URL_BUG = JavaSystemCommons.get(SystemEnvInfoKey.Vendor.JAVA_VENDOR_URL_BUG);
+    private final String JAVA_VENDOR = JavaSystemCommons.get(SystemEnvInfoKey.Vendor.JAVA_VENDOR);
+    private final String JAVA_VENDOR_URL = JavaSystemCommons.get(SystemEnvInfoKey.Vendor.JAVA_VENDOR_URL);
+    private final String JAVA_VENDOR_URL_BUG = JavaSystemCommons.get(SystemEnvInfoKey.Vendor.JAVA_VENDOR_URL_BUG);
 
     /**
-     *  spec
+     * spec
      */
 
-    public final String JAVA_SPECIFICATION_VERSION = JavaSystemCommons.get(SystemEnvInfoKey.specification.JAVA_SPECIFICATION_VERSION);
-    public final String JAVA_SPECIFICATION_VENDOR = JavaSystemCommons.get(SystemEnvInfoKey.specification.JAVA_SPECIFICATION_VENDOR);
-    public final String JAVA_SPECIFICATION_NAME = JavaSystemCommons.get(SystemEnvInfoKey.specification.JAVA_SPECIFICATION_NAME);
+    private final String JAVA_SPECIFICATION_VERSION = JavaSystemCommons.get(SystemEnvInfoKey.specification.JAVA_SPECIFICATION_VERSION);
+    private final String JAVA_SPECIFICATION_VENDOR = JavaSystemCommons.get(SystemEnvInfoKey.specification.JAVA_SPECIFICATION_VENDOR);
+    private final String JAVA_SPECIFICATION_NAME = JavaSystemCommons.get(SystemEnvInfoKey.specification.JAVA_SPECIFICATION_NAME);
 
     /**
      * jvm
      */
-    public final String JAVA_VM_INFO = JavaSystemCommons.get(SystemEnvInfoKey.VM.JAVA_VM_INFO);
-    public final String JAVA_VM_VERSION = JavaSystemCommons.get(SystemEnvInfoKey.VM.JAVA_VM_VERSION);
-    public final String JAVA_VM_NAME = JavaSystemCommons.get(SystemEnvInfoKey.VM.JAVA_VM_NAME);
-    public final String JAVA_VM_VENDOR = JavaSystemCommons.get(SystemEnvInfoKey.VM.JAVA_VM_VENDOR);
-    public final String JAVA_VM_SPECIFICATION_VERSION = JavaSystemCommons.get(SystemEnvInfoKey.VM.JAVA_VM_SPECIFICATION_VERSION);
-    public final String JAVA_VM_SPECIFICATION_VENDOR = JavaSystemCommons.get(SystemEnvInfoKey.VM.JAVA_VM_SPECIFICATION_VENDOR);
-    public final String JAVA_VM_SPECIFICATION_NAME = JavaSystemCommons.get(SystemEnvInfoKey.VM.JAVA_VM_SPECIFICATION_NAME);
+    private final String JAVA_VM_INFO = JavaSystemCommons.get(SystemEnvInfoKey.VM.JAVA_VM_INFO);
+    private final String JAVA_VM_VERSION = JavaSystemCommons.get(SystemEnvInfoKey.VM.JAVA_VM_VERSION);
+    private final String JAVA_VM_NAME = JavaSystemCommons.get(SystemEnvInfoKey.VM.JAVA_VM_NAME);
+    private final String JAVA_VM_VENDOR = JavaSystemCommons.get(SystemEnvInfoKey.VM.JAVA_VM_VENDOR);
+    private final String JAVA_VM_SPECIFICATION_VERSION = JavaSystemCommons.get(SystemEnvInfoKey.VM.JAVA_VM_SPECIFICATION_VERSION);
+    private final String JAVA_VM_SPECIFICATION_VENDOR = JavaSystemCommons.get(SystemEnvInfoKey.VM.JAVA_VM_SPECIFICATION_VENDOR);
+    private final String JAVA_VM_SPECIFICATION_NAME = JavaSystemCommons.get(SystemEnvInfoKey.VM.JAVA_VM_SPECIFICATION_NAME);
 
     /**
      * 常用环境信息
      */
-    public final String JAVA_VERSION = JavaSystemCommons.get(SystemEnvInfoKey.Others.JAVA_VERSION);
-    public final String JAVA_HOME = JavaSystemCommons.get(SystemEnvInfoKey.Others.JAVA_HOME);
-    public final String JAVA_RUNTIME_VERSION = JavaSystemCommons.get(SystemEnvInfoKey.Others.JAVA_RUNTIME_VERSION);
-    public final String JAVA_RUNTIME_NAME = JavaSystemCommons.get(SystemEnvInfoKey.Others.JAVA_RUNTIME_NAME);
-    public final String JAVA_LIBRARY_PATH = JavaSystemCommons.get(SystemEnvInfoKey.Others.JAVA_LIBRARY_PATH);
-    public final String JAVA_CLASS_PATH = JavaSystemCommons.get(SystemEnvInfoKey.Others.JAVA_CLASS_PATH);
-    public final String JAVA_AWT_PRINTERJOB = JavaSystemCommons.get(SystemEnvInfoKey.Others.JAVA_AWT_PRINTERJOB);
-    public final String JAVA_AWT_GRAPHICSENV = JavaSystemCommons.get(SystemEnvInfoKey.Others.JAVA_AWT_GRAPHICSENV);
-    public final String JAVA_IO_TMPDIR = JavaSystemCommons.get(SystemEnvInfoKey.Others.JAVA_IO_TMPDIR);
-    public final String JAVA_ENDORSED_DIRS = JavaSystemCommons.get(SystemEnvInfoKey.Others.JAVA_ENDORSED_DIRS);
-    public final String JAVA_CLASS_VERSION = JavaSystemCommons.get(SystemEnvInfoKey.Others.JAVA_CLASS_VERSION);
-    public final String JAVA_EXT_DIRS = JavaSystemCommons.get(SystemEnvInfoKey.Others.JAVA_EXT_DIRS);
+    private final String JAVA_VERSION = JavaSystemCommons.get(SystemEnvInfoKey.Others.JAVA_VERSION);
+    private final String JAVA_HOME = JavaSystemCommons.get(SystemEnvInfoKey.Others.JAVA_HOME);
+    private final String JAVA_RUNTIME_VERSION = JavaSystemCommons.get(SystemEnvInfoKey.Others.JAVA_RUNTIME_VERSION);
+    private final String JAVA_RUNTIME_NAME = JavaSystemCommons.get(SystemEnvInfoKey.Others.JAVA_RUNTIME_NAME);
+    private final String JAVA_LIBRARY_PATH = JavaSystemCommons.get(SystemEnvInfoKey.Others.JAVA_LIBRARY_PATH);
+    private final String JAVA_CLASS_PATH = JavaSystemCommons.get(SystemEnvInfoKey.Others.JAVA_CLASS_PATH);
+    private final String JAVA_AWT_PRINTERJOB = JavaSystemCommons.get(SystemEnvInfoKey.Others.JAVA_AWT_PRINTERJOB);
+    private final String JAVA_AWT_GRAPHICSENV = JavaSystemCommons.get(SystemEnvInfoKey.Others.JAVA_AWT_GRAPHICSENV);
+    private final String JAVA_IO_TMPDIR = JavaSystemCommons.get(SystemEnvInfoKey.Others.JAVA_IO_TMPDIR);
+    private final String JAVA_ENDORSED_DIRS = JavaSystemCommons.get(SystemEnvInfoKey.Others.JAVA_ENDORSED_DIRS);
+    private final String JAVA_CLASS_VERSION = JavaSystemCommons.get(SystemEnvInfoKey.Others.JAVA_CLASS_VERSION);
+    private final String JAVA_EXT_DIRS = JavaSystemCommons.get(SystemEnvInfoKey.Others.JAVA_EXT_DIRS);
 
-
-    public static String getJavaVendor() {
+    public String getJAVA_VENDOR() {
         return JAVA_VENDOR;
     }
 
-    public static String getJavaVendorUrl() {
+    public String getJAVA_VENDOR_URL() {
         return JAVA_VENDOR_URL;
     }
 
-    public static String getJavaVendorUrlBug() {
+    public String getJAVA_VENDOR_URL_BUG() {
         return JAVA_VENDOR_URL_BUG;
     }
 

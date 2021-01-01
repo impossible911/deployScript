@@ -1,4 +1,9 @@
-package com.ibe;
-
-public class Test {
-}
+//package com.ibe;
+//
+//import com.ibe.common.envInfo.*;
+//
+//public class Test {
+//
+//    public static void main(String[] args) {
+//    }
+//}
