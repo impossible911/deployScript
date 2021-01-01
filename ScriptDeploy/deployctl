@@ -28,7 +28,7 @@ skywalking_agent_name=project_name
 EOF
 echo ""
 logOut "makeProperties " "$properties_dir 模板文件填充完成，请设置您的部署信息 " "error"
-echo "" 
+echo ""
 logOut "makeProperties " "$properties_dir 设置完成后请再次deployctl start 初始化工作空间 " "error"
 }
 function properties() {
