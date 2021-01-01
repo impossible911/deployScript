@@ -33,7 +33,7 @@ public final class GetSingleton {
         OsInfo osInfo = (OsInfo) singletonPools.get("OsInfo");
         if (osInfo == null) {
             osInfo = EnvSingleton.getOsInfo();
-            singletonPools.put("JavaEnvInfo", osInfo);
+            singletonPools.put("osInfo", osInfo);
         }
         return osInfo;
     }
@@ -41,7 +41,7 @@ public final class GetSingleton {
         SunInfo sunInfo = (SunInfo) singletonPools.get("sunInfo");
         if (sunInfo == null) {
             sunInfo = EnvSingleton.getSunInfo();
-            singletonPools.put("JavaEnvInfo", sunInfo);
+            singletonPools.put("sunInfo", sunInfo);
         }
         return sunInfo;
     }
@@ -49,7 +49,7 @@ public final class GetSingleton {
         SystemInfo systemInfo = (SystemInfo) singletonPools.get("systemInfo");
         if (systemInfo == null) {
             systemInfo = EnvSingleton.getSystemInfo();
-            singletonPools.put("JavaEnvInfo", systemInfo);
+            singletonPools.put("systemInfo", systemInfo);
         }
         return systemInfo;
     }

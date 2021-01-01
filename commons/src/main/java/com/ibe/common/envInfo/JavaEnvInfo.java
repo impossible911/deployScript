@@ -61,9 +61,6 @@ public class JavaEnvInfo implements Serializable {
     public final String JAVA_CLASS_VERSION = JavaSystemCommons.get(SystemEnvInfoKey.Others.JAVA_CLASS_VERSION);
     public final String JAVA_EXT_DIRS = JavaSystemCommons.get(SystemEnvInfoKey.Others.JAVA_EXT_DIRS);
 
-    public static long getSerialVersionUID() {
-        return serialVersionUID;
-    }
 
     public static String getJavaVendor() {
         return JAVA_VENDOR;

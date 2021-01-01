@@ -20,10 +20,6 @@ public class SunInfo implements Serializable {
     private static final String SUN_OS_PATCH_LEVEL =JavaSystemCommons.get(SystemEnvInfoKey.SUN.SUN_OS_PATCH_LEVEL);
     private static final String SUN_BOOT_LIBRARY_PATH =JavaSystemCommons.get(SystemEnvInfoKey.SUN.SUN_BOOT_LIBRARY_PATH);
 
-    public static long getSerialVersionUID() {
-        return serialVersionUID;
-    }
-
     public static String getSunCpuIsalist() {
         return SUN_CPU_ISALIST;
     }

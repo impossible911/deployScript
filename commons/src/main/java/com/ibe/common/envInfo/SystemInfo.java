@@ -20,10 +20,6 @@ public class SystemInfo implements Serializable {
     private static final String LINE_SEPARATOR = JavaSystemCommons.get(SystemEnvInfoKey.System.LINE_SEPARATOR);
     private static final String PATH_SEPARATOR = JavaSystemCommons.get(SystemEnvInfoKey.System.PATH_SEPARATOR);
 
-    public static long getSerialVersionUID() {
-        return serialVersionUID;
-    }
-
     public static String getFileSeparator() {
         return FILE_SEPARATOR;
     }
