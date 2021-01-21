@@ -18,13 +18,13 @@ public final class GetSingleton {
      * 后续添加统一对象创建逻辑
      * </>
      *
-     * @return
+     * @return JavaEnvInfo
      */
     public static JavaEnvInfo getJavaEnvInfo() {
-        JavaEnvInfo javaEnvInfo = (JavaEnvInfo) singletonPools.get("JavaEnvInfo");
+        JavaEnvInfo javaEnvInfo = (JavaEnvInfo) singletonPools.get("javaEnvInfo");
         if (javaEnvInfo == null) {
             javaEnvInfo = EnvSingleton.getJavaEnvInfo();
-            singletonPools.put("JavaEnvInfo", javaEnvInfo);
+            singletonPools.put("javaEnvInfo", javaEnvInfo);
         }
         return javaEnvInfo;
     }
