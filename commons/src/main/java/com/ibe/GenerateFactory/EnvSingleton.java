@@ -1,60 +1,31 @@
 package com.ibe.GenerateFactory;
 
-import com.ibe.common.envInfo.JavaEnvInfo;
-import com.ibe.common.envInfo.OsInfo;
-import com.ibe.common.envInfo.SunInfo;
-import com.ibe.common.envInfo.SystemInfo;
+import com.ibe.common.buildObj.Reflects;
+import com.ibe.common.exception.IllegalAssert;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class EnvSingleton {
-    private volatile static JavaEnvInfo javaEnvInfo;
-    private volatile static OsInfo osInfo;
-    private volatile static SunInfo sunInfo;
-    private volatile static SystemInfo systemInfo;
+
+    private static volatile Map<String, Object> singletonPools = new ConcurrentHashMap<>();
 
     private EnvSingleton() {
     }
 
-    public static JavaEnvInfo getJavaEnvInfo() {
-        if (javaEnvInfo == null) {
+    @SuppressWarnings("unchecked")
+    public static <T> T getSingle(Class<T> clazz) {
+        IllegalAssert.notNull(clazz, "class must be not null");
+        T obj = (T) singletonPools.get(clazz.getName());
+        if (obj == null) {
             synchronized (EnvSingleton.class) {
-                if (javaEnvInfo == null) {
-                    javaEnvInfo = new JavaEnvInfo();
+                obj = (T) singletonPools.get(clazz.getName());
+                if (obj == null) {
+                    obj = Reflects.getNewObj(clazz);
+                    singletonPools.put(clazz.getName(), obj);
                 }
             }
         }
-        return javaEnvInfo;
+        return obj;
     }
-
-    public static OsInfo getOsInfo() {
-        if (osInfo == null) {
-            synchronized (EnvSingleton.class) {
-                if (osInfo == null) {
-                    osInfo = new OsInfo();
-                }
-            }
-        }
-        return osInfo;
-    }
-    public static SunInfo getSunInfo() {
-        if (sunInfo == null) {
-            synchronized (EnvSingleton.class) {
-                if (sunInfo == null) {
-                    sunInfo = new SunInfo();
-                }
-            }
-        }
-        return sunInfo;
-    }
-    public static SystemInfo getSystemInfo() {
-        if (systemInfo == null) {
-            synchronized (EnvSingleton.class) {
-                if (systemInfo == null) {
-                    systemInfo = new SystemInfo();
-                }
-            }
-        }
-        return systemInfo;
-    }
-
-
 }

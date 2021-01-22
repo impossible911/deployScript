@@ -5,68 +5,21 @@ import com.ibe.common.envInfo.OsInfo;
 import com.ibe.common.envInfo.SunInfo;
 import com.ibe.common.envInfo.SystemInfo;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 public final class GetSingleton {
 
-    private static volatile Map<String, Object> singletonPools = new ConcurrentHashMap<>();
-
-    /**
-     * <p>
-     * 临时使用的方法
-     * 后续添加统一对象创建逻辑
-     * </>
-     *
-     * @return JavaEnvInfo
-     */
     public static JavaEnvInfo getJavaEnvInfo() {
-        JavaEnvInfo javaEnvInfo = (JavaEnvInfo) singletonPools.get("javaEnvInfo");
-        if (javaEnvInfo == null) {
-            javaEnvInfo = EnvSingleton.getJavaEnvInfo();
-            singletonPools.put("javaEnvInfo", javaEnvInfo);
-        }
-        return javaEnvInfo;
+        return EnvSingleton.getSingle(JavaEnvInfo.class);
     }
 
     public static OsInfo getOsInfo() {
-        OsInfo osInfo = (OsInfo) singletonPools.get("OsInfo");
-        if (osInfo == null) {
-            osInfo = EnvSingleton.getOsInfo();
-            singletonPools.put("osInfo", osInfo);
-        }
-        return osInfo;
+       return EnvSingleton.getSingle(OsInfo.class);
     }
+
     public static SunInfo getSunInfo() {
-        SunInfo sunInfo = (SunInfo) singletonPools.get("sunInfo");
-        if (sunInfo == null) {
-            sunInfo = EnvSingleton.getSunInfo();
-            singletonPools.put("sunInfo", sunInfo);
-        }
-        return sunInfo;
+        return EnvSingleton.getSingle(SunInfo.class);
     }
+
     public static SystemInfo getSystemInfo() {
-        SystemInfo systemInfo = (SystemInfo) singletonPools.get("systemInfo");
-        if (systemInfo == null) {
-            systemInfo = EnvSingleton.getSystemInfo();
-            singletonPools.put("systemInfo", systemInfo);
-        }
-        return systemInfo;
+        return EnvSingleton.getSingle(SystemInfo.class);
     }
-   /* public static <T> T get(Class<T> clazz) {
-        if (clazz == null) {
-            throw new IllegalArgumentException("Class must not be null");
-        }
-        String clazzName = clazz.getName();
-        T object  = (T)singletonPools.get(clazzName);
-        if (object == null) {
-            synchronized (EnvInfoSingleton.class) {
-                if (object == null) {
-                    object = (T) EnvSingleton.getJavaEnvInfo();
-                    singletonPools.put(clazzName, object);
-                }
-            }
-        }
-        return object;
-    }*/
 }
