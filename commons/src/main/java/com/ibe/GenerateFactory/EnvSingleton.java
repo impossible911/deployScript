@@ -6,9 +6,12 @@ import com.ibe.common.exception.IllegalAssert;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * @author 92862
+ */
 public class EnvSingleton {
 
-    private static volatile Map<String, Object> singletonPools = new ConcurrentHashMap<>();
+    private static final Map<String, Object> SINGLETON_POOLS = new ConcurrentHashMap<>();
 
     private EnvSingleton() {
     }
@@ -16,13 +19,13 @@ public class EnvSingleton {
     @SuppressWarnings("unchecked")
     public static <T> T getSingle(Class<T> clazz) {
         IllegalAssert.notNull(clazz, "class must be not null");
-        T obj = (T) singletonPools.get(clazz.getName());
+        T obj = (T) SINGLETON_POOLS.get(clazz.getName());
         if (obj == null) {
             synchronized (EnvSingleton.class) {
-                obj = (T) singletonPools.get(clazz.getName());
+                obj = (T) SINGLETON_POOLS.get(clazz.getName());
                 if (obj == null) {
                     obj = Reflects.getNewObj(clazz);
-                    singletonPools.put(clazz.getName(), obj);
+                    SINGLETON_POOLS.put(clazz.getName(), obj);
                 }
             }
         }

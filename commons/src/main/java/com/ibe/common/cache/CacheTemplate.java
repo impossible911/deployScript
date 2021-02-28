@@ -8,6 +8,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 /**
  * 只提供简单存储查询功能
  * 不能保证存储一定成功
+ * @author 92862
  * @param <K>
  * @param <V>
  */

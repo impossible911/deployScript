@@ -4,6 +4,9 @@ import java.io.Serializable;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+/**
+ * @author 92862
+ */
 public class LinkedHashMapCache<K, V> extends CacheTemplate<K, V> implements Serializable {
 
     static class LRUCache<K, V> extends LinkedHashMap<K, V> {

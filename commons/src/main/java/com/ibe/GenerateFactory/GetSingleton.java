@@ -5,6 +5,9 @@ import com.ibe.common.envInfo.OsInfo;
 import com.ibe.common.envInfo.SunInfo;
 import com.ibe.common.envInfo.SystemInfo;
 
+/**
+ * @author 92862
+ */
 public final class GetSingleton {
 
     public static JavaEnvInfo getJavaEnvInfo() {
